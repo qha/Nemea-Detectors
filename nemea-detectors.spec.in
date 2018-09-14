@@ -1,4 +1,4 @@
-%if 0%{?el6}
+%if 0%{?el6}%{?el7}
 %global python3_pkgversion 34
 %endif
 
