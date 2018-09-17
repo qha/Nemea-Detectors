@@ -56,6 +56,8 @@
 #include <b_plus_tree.h>
 #include <stdbool.h>
 #include <time.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #define MAX_PACKETS 1 // Maximum number of packets in suspicious flow
 
@@ -230,6 +232,15 @@ int send_alert(ur_template_t *out_tmplt, void *out_rec,
    ur_set(out_tmplt, out_rec, F_DST_IP3, ip_from_int(np->static_addrs[3]));
 
    return trap_send(0, out_rec, ur_rec_size(out_tmplt, out_rec));
+}
+
+void print_treekey(char *pfx, treekey_t *key, char *sfx) {
+   struct in_addr src_ip = { htonl(key->fields.src_ip) };
+   printf("%ssrc_ip: %s, dst_port: %hu%s",
+          pfx,
+          inet_ntoa(src_ip),
+          key->fields.dst_port,
+          sfx);
 }
 
 int main(int argc, char **argv)
