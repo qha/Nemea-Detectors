@@ -438,6 +438,8 @@ int main(int argc, char **argv)
 
          if (insert_addr(new_item, int_dst_ip) == 1) {
             // Scan detected
+            print_treekey("*** alerting about scanned addresses threshold exceeded: ",
+                          &key_to_tree, "\n");
             ret_val = send_alert(out_tmplt, out_rec, &key_to_tree, np);
             // free dynamic array of addresses
             if (np->dynamic_addrs != NULL) {
@@ -491,12 +493,18 @@ int main(int argc, char **argv)
             if ((ts_cur_time - value_pt->ts_modified) > param.idle_threshold) {
                if (value_pt->alerted) {
                   // send alert about trailing scanned addresses
+                  print_treekey("*** alerting about trailing scanned addresses: ",
+                                (treekey_t *) b_item->key,
+                                "\n");
                   ret_val = send_alert(out_tmplt, out_rec, (treekey_t *) b_item->key, value_pt);
                }
                // free dynamic array of addresses
                if (value_pt->dynamic_addrs != NULL) {
                   free(value_pt->dynamic_addrs);
                }
+               print_treekey("deleting key: ",
+                             (treekey_t *) b_item->key,
+                             value_pt->alerted ? " *** alerted\n" : "\n");
                has_next = bpt_list_item_del(b_plus_tree, b_item);
                // break on error, do nothing on timeout in order to
                // continue tree pruning
@@ -505,6 +513,9 @@ int main(int argc, char **argv)
                has_next = bpt_list_item_next(b_plus_tree, b_item);
             }
          }
+         // print_treekey("\nlast examined item during pruning: ",
+         //               (treekey_t *) b_item->key,
+         //               "\n");
          printf("\nnumber of values after pruning: %lu\n", bpt_item_cnt(b_plus_tree));
          time(&ts_last_pruning);
       }
